@@ -1,0 +1,100 @@
+ERROR at //third_party/ffmpeg/BUILD.gn:1693:17 (//build/toolchain/mingw:mingw_x86_64): Empty directory path.
+
+    rebase_path(sysroot, root_build_dir),
+
+                ^------
+
+You can't use empty strings as directories.
+
+See //foundation/multimedia/image_framework/interfaces/innerkits/BUILD.gn:182:9: which caused the file to be included.
+
+        "//third_party/ffmpeg:libohosffmpeg_static",
+
+        ^------------------------------------------
+
+current_cpu = x64
+
+current_os = linux
+
+host_os = linux
+
+is_mingw = false
+
+ffmpeg selected cplatform
+
+imf_enable:  true
+
+bundle_framework_power_mgr_enable = true
+
+bundle_framework_user_status_awareness_enable = false
+
+bundle_framework_graphics = true
+
+bundle_framework_free_install = false
+
+bundle_framework_default_app = true
+
+bundle_framework_launcher = true
+
+bundle_framework_sandbox_app = true
+
+bundle_framework_quick_fix = true
+
+bundle_framework_app_control = true
+
+distributed_bundle_framework = true
+
+ability_runtime_enable = true
+
+account_enable = true
+
+configpolicy_enable = false
+
+global_resmgr_enable = true
+
+hicollie_enable = true
+
+support_jsapi = true
+
+hisysevent_enable = true
+
+bundle_framework_overlay_install = true
+
+bundle_framework_bundle_resource = true
+
+verify_abc_enabled = true
+
+openssl detecting os now...
+
+current_cpu = arm64
+
+current_os = ohos
+
+host_os = linux
+
+is_mingw = false
+
+openssl selected linux-aarch64
+
+openssl detecting os done. openssl_selected_platform = linux-aarch64
+
+bundle_framework_power_mgr_enable = true
+
+bundle_framework_user_status_awareness_enable = false
+
+bundle_framework_graphics = true
+
+bundle_framework_free_install = false
+
+bundle_framework_default_app = true
+
+bundle_framework_launcher = true
+
+bundle_framework_sandbox_app = true
+
+bundle_framework_quick_fix = true
+
+bundle_framework_app_control = true
+
+distributed_bundle_framework = true
+
