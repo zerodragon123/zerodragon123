@@ -1,0 +1,262 @@
+[OHOS INFO] loader args:['platforms_config_file="/home/gc/openharmony/0510_master/out/preloader/ohos-sdk/platforms.build"', 'subsystem_config_file="/home/gc/openharmony/0510_master/out/preloader/ohos-sdk/subsystem_config.json"', 'example_subsystem_file=""', 'exclusion_modules_config_file="/home/gc/openharmony/0510_master/out/preloader/ohos-sdk/exclusion_modules.json"', 'source_root_dir="/home/gc/openharmony/0510_master/"', 'gn_root_out_dir="out/sdk"', 'build_platform_name=phone', 'build_xts=False', 'load_test_config=True', 'target_os=ohos', 'target_cpu=arm64', 'os_level=standard', "ignore_api_check=['xts', 'common', 'testfwk']", 'scalable_build=False', 'skip_partlist_check=False']
+[OHOS INFO] Excuting gn command: /home/gc/openharmony/0510_master/prebuilts/build-tools/linux-x86/bin/gn gen --args="product_name=\"ohos-sdk\" product_path=\"/home/gc/openharmony/0510_master/productdefine/common/products\" product_config_path=\"/home/gc/openharmony/0510_master/productdefine/common/products\" device_name=\"sdk\" device_path=\"/home/gc/openharmony/0510_master/device/board/ohos/sdk\" device_company=\"ohos\" device_config_path=\"/home/gc/openharmony/0510_master/device/board/ohos/sdk\" target_cpu=\"arm64\" is_standard_system=true ohos_build_compiler_specified=\"\" ohos_build_time=1715300065967 ohos_build_datetime=\"2024-05-10 16:14:25\" ohos_build_type=\"debug\" device_type=\"default\" build_variant=\"root\" root_perf_main=\"main\" runtime_mode=\"release\"" --args=product_name="ohos-sdk" product_path="/home/gc/openharmony/0510_master/productdefine/common/products" product_config_path="/home/gc/openharmony/0510_master/productdefine/common/products" device_name="sdk" device_path="/home/gc/openharmony/0510_master/device/board/ohos/sdk" device_company="ohos" device_config_path="/home/gc/openharmony/0510_master/device/board/ohos/sdk" target_cpu="arm64" is_standard_system=true ohos_build_compiler_specified="" ohos_build_time=1715300065967 ohos_build_datetime="2024-05-10 16:14:25" ohos_build_type="debug" device_type="default" build_variant="root" root_perf_main="main" runtime_mode="release" /home/gc/openharmony/0510_master/out/sdk
+root_out_dir=//out/sdk
+root_build_dir=//out/sdk
+root_gen_dir=//out/sdk/gen
+current_toolchain=//build/toolchain/ohos:ohos_clang_arm64
+host_toolchain=//build/toolchain/linux:clang_x64
+input_feature_combination_key = true
+input_feature_pointer_drawing = true
+input_feature_monitor = true
+input_feature_interceptor = true
+input_feature_keyboard = true
+input_feature_switch = true
+input_feature_mouse = true
+input_feature_joystick = true
+input_feature_touchscreen = true
+input_feature_input_device = true
+input_feature_short_key = true
+input_feature_infrared_emitter = true
+["--haptobin", "../../developtools/packing_tool/adapter/ohos", "--haptobinOutput", "mingw_x86_64/obj/developtools/packing_tool/jar/haptobin_tool.jar", "--unpackOutput", "mingw_x86_64/obj/developtools/packing_tool/jar/app_unpacking_tool.jar", "--packOutput", "mingw_x86_64/obj/developtools/packing_tool/jar/app_packing_tool.jar", "--outpath", "mingw_x86_64/obj/developtools/packing_tool/jar", "--checkOutput", "mingw_x86_64/obj/developtools/packing_tool/jar/app_check_tool.jar", "--toolchain", "//build/toolchain/mingw:mingw_x86_64", "--compileTarget", "image"]
+["--haptobin", "../../developtools/packing_tool/adapter/ohos", "--haptobinOutput", "clang_x64/obj/developtools/packing_tool/jar/haptobin_tool.jar", "--unpackOutput", "clang_x64/obj/developtools/packing_tool/jar/app_unpacking_tool.jar", "--packOutput", "clang_x64/obj/developtools/packing_tool/jar/app_packing_tool.jar", "--outpath", "clang_x64/obj/developtools/packing_tool/jar", "--checkOutput", "clang_x64/obj/developtools/packing_tool/jar/app_check_tool.jar", "--toolchain", "//build/toolchain/linux:clang_x64", "--compileTarget", "image"]
+scene_board_enabled = false
+window_manager_feature_subscribe_motion = false
+scene_board_enabled = false
+window_manager_feature_subscribe_motion = false
+openssl detecting os now...
+current_cpu = x86_64
+current_os = mingw
+host_os = linux
+is_mingw = true
+openssl selected mingw64
+openssl detecting os done. openssl_selected_platform = mingw64
+{ }
+Build curl is_cares_on: false
+{ }
+Build curl is_cares_on: true
+Cares install
+["--haptobin", "../../developtools/packing_tool/adapter/ohos", "--haptobinOutput", "obj/developtools/packing_tool/jar/haptobin_tool.jar", "--unpackOutput", "obj/developtools/packing_tool/jar/app_unpacking_tool.jar", "--packOutput", "obj/developtools/packing_tool/jar/app_packing_tool.jar", "--outpath", "obj/developtools/packing_tool/jar", "--checkOutput", "obj/developtools/packing_tool/jar/app_check_tool.jar", "--toolchain", "//build/toolchain/ohos:ohos_clang_arm64", "--compileTarget", "image"]
+has_hisysevent_part = true
+event ces_hitrace_usage = true
+bundle_framework_power_mgr_enable = true
+bundle_framework_user_status_awareness_enable = false
+bundle_framework_graphics = true
+bundle_framework_free_install = false
+bundle_framework_default_app = true
+bundle_framework_launcher = true
+bundle_framework_sandbox_app = true
+bundle_framework_quick_fix = true
+bundle_framework_app_control = true
+distributed_bundle_framework = true
+ability_runtime_enable = true
+account_enable = true
+configpolicy_enable = false
+global_resmgr_enable = true
+hicollie_enable = true
+support_jsapi = true
+hisysevent_enable = true
+bundle_framework_overlay_install = true
+bundle_framework_bundle_resource = true
+verify_abc_enabled = true
+target_out_dir //out/sdk/clang_x64/obj/arkcompiler/runtime_core/libark_defect_scan_aux/tests/unittest
+target_dir /home/gc/openharmony/0510_master/out/sdk/clang_x64/obj/arkcompiler/runtime_core/libark_defect_scan_aux/tests/unittest
+test_abc_dir /home/gc/openharmony/0510_master/out/sdk/clang_x64/obj/arkcompiler/runtime_core/libark_defect_scan_aux/tests/unittest
+target_out_dir //out/sdk/mingw_x86_64/obj/arkcompiler/runtime_core/libark_defect_scan_aux/tests/unittest
+target_dir /home/gc/openharmony/0510_master/out/sdk/mingw_x86_64/obj/arkcompiler/runtime_core/libark_defect_scan_aux/tests/unittest
+test_abc_dir /home/gc/openharmony/0510_master/out/sdk/mingw_x86_64/obj/arkcompiler/runtime_core/libark_defect_scan_aux/tests/unittest
+target_out_dir //out/sdk/obj/arkcompiler/runtime_core/libark_defect_scan_aux/tests/unittest
+target_dir /home/gc/openharmony/0510_master/out/sdk/obj/arkcompiler/runtime_core/libark_defect_scan_aux/tests/unittest
+test_abc_dir /home/gc/openharmony/0510_master/out/sdk/obj/arkcompiler/runtime_core/libark_defect_scan_aux/tests/unittest
+scene_board_enabled = false
+window_manager_feature_subscribe_motion = false
+imf_enable:  true
+imf_enable:  true
+imf_enable:  true
+imf_enable:  true
+display_commontype
+display_buffer
+display_buffer
+display_buffer
+display_commontype
+display_buffer
+display_commontype
+display_commontype
+display_commontype
+imf_enable:  true
+imf_enable:  true
+current_cpu = arm64
+current_os = ohos
+host_os = linux
+is_mingw = false
+ffmpeg selected aarch64
+current_cpu = x86_64
+current_os = mingw
+host_os = linux
+is_mingw = true
+ffmpeg selected cplatform
+ERROR at //third_party/ffmpeg/BUILD.gn:1693:17 (//build/toolchain/mingw:mingw_x86_64): Empty directory path.
+    rebase_path(sysroot, root_build_dir),
+                ^------
+You can't use empty strings as directories.
+See //foundation/multimedia/image_framework/interfaces/innerkits/BUILD.gn:182:9: which caused the file to be included.
+        "//third_party/ffmpeg:libohosffmpeg_static",
+        ^------------------------------------------
+current_cpu = x64
+current_os = linux
+host_os = linux
+is_mingw = false
+ffmpeg selected cplatform
+openssl detecting os now...
+current_cpu = arm64
+current_os = ohos
+host_os = linux
+is_mingw = false
+openssl selected linux-aarch64
+openssl detecting os done. openssl_selected_platform = linux-aarch64
+display_buffer
+display_buffer
+bundle_framework_power_mgr_enable = true
+bundle_framework_user_status_awareness_enable = false
+bundle_framework_graphics = true
+bundle_framework_free_install = false
+bundle_framework_default_app = true
+bundle_framework_launcher = true
+bundle_framework_sandbox_app = true
+bundle_framework_quick_fix = true
+bundle_framework_app_control = true
+distributed_bundle_framework = true
+ability_runtime_enable = true
+account_enable = true
+configpolicy_enable = false
+global_resmgr_enable = true
+hicollie_enable = true
+support_jsapi = true
+hisysevent_enable = true
+bundle_framework_overlay_install = true
+bundle_framework_bundle_resource = true
+verify_abc_enabled = true
+bundle_framework_power_mgr_enable = true
+bundle_framework_user_status_awareness_enable = false
+bundle_framework_graphics = true
+bundle_framework_free_install = false
+bundle_framework_default_app = true
+bundle_framework_launcher = true
+bundle_framework_sandbox_app = true
+bundle_framework_quick_fix = true
+bundle_framework_app_control = true
+distributed_bundle_framework = true
+ability_runtime_enable = true
+account_enable = true
+configpolicy_enable = false
+global_resmgr_enable = true
+hicollie_enable = true
+support_jsapi = true
+hisysevent_enable = true
+bundle_framework_overlay_install = true
+bundle_framework_bundle_resource = true
+verify_abc_enabled = true
+display_buffer
+display_buffer
+display_commontype
+input_service
+input_feature_infrared_emitter = true
+cmd ['/home/gc/openharmony/0510_master/third_party/openssl/make_openssl_build_all_generated.sh', '/home/gc/openharmony/0510_master/third_party/openssl', '/home/gc/openharmony/0510_master/out/sdk/mingw_x86_64/obj/third_party/openssl/build_all_generated', 'mingw64'] start
+result.returncode = 0
+result.stdout = /home/gc/openharmony/0510_master/out/sdk
+~/openharmony/0510_master/out/sdk/mingw_x86_64/obj/third_party/openssl/build_all_generated/mingw64 ~/openharmony/0510_master/out/sdk
+/home/gc/openharmony/0510_master/third_party/openssl/Configure mingw64 no-shared no-module
+Configuring OpenSSL version 3.0.9 for target mingw64
+Using os-specific seed configuration
+Created configdata.pm
+Running configdata.pm
+Created Makefile.in
+Created Makefile
+Created include/openssl/configuration.h
+
+**********************************************************************
+***                                                                ***
+***   OpenSSL has been successfully configured                     ***
+***                                                                ***
+***   If you encounter a problem while building, please open an    ***
+***   issue on GitHub <https://github.com/openssl/openssl/issues>  ***
+***   and include the output from the following command:           ***
+***                                                                ***
+***       perl configdata.pm --dump                                ***
+***                                                                ***
+***   (If you are new to OpenSSL, you might want to consult the    ***
+***   'Troubleshooting' section in the INSTALL.md file first)      ***
+***                                                                ***
+**********************************************************************
+~/openharmony/0510_master/out/sdk
+
+cmd ['/home/gc/openharmony/0510_master/third_party/openssl/make_openssl_build_all_generated.sh', '/home/gc/openharmony/0510_master/third_party/openssl', '/home/gc/openharmony/0510_master/out/sdk/mingw_x86_64/obj/third_party/openssl/build_all_generated', 'mingw64'] ok
+
+openssl detecting os now...
+current_cpu = x64
+current_os = linux
+host_os = linux
+is_mingw = false
+openssl selected linux-x86_64
+openssl detecting os done. openssl_selected_platform = linux-x86_64
+cmd ['/home/gc/openharmony/0510_master/third_party/openssl/make_openssl_build_all_generated.sh', '/home/gc/openharmony/0510_master/third_party/openssl', '/home/gc/openharmony/0510_master/out/sdk/obj/third_party/openssl/build_all_generated', 'linux-aarch64'] start
+result.returncode = 0
+result.stdout = /home/gc/openharmony/0510_master/out/sdk
+~/openharmony/0510_master/out/sdk/obj/third_party/openssl/build_all_generated/linux-aarch64 ~/openharmony/0510_master/out/sdk
+/home/gc/openharmony/0510_master/third_party/openssl/Configure linux-aarch64 no-shared no-module
+Configuring OpenSSL version 3.0.9 for target linux-aarch64
+Using os-specific seed configuration
+Created configdata.pm
+Running configdata.pm
+Created Makefile.in
+Created Makefile
+Created include/openssl/configuration.h
+
+**********************************************************************
+***                                                                ***
+***   OpenSSL has been successfully configured                     ***
+***                                                                ***
+***   If you encounter a problem while building, please open an    ***
+***   issue on GitHub <https://github.com/openssl/openssl/issues>  ***
+***   and include the output from the following command:           ***
+***                                                                ***
+***       perl configdata.pm --dump                                ***
+***                                                                ***
+***   (If you are new to OpenSSL, you might want to consult the    ***
+***   'Troubleshooting' section in the INSTALL.md file first)      ***
+***                                                                ***
+**********************************************************************
+~/openharmony/0510_master/out/sdk
+
+cmd ['/home/gc/openharmony/0510_master/third_party/openssl/make_openssl_build_all_generated.sh', '/home/gc/openharmony/0510_master/third_party/openssl', '/home/gc/openharmony/0510_master/out/sdk/obj/third_party/openssl/build_all_generated', 'linux-aarch64'] ok
+
+cmd ['/home/gc/openharmony/0510_master/third_party/openssl/make_openssl_build_all_generated.sh', '/home/gc/openharmony/0510_master/third_party/openssl', '/home/gc/openharmony/0510_master/out/sdk/clang_x64/obj/third_party/openssl/build_all_generated', 'linux-x86_64'] start
+result.returncode = 0
+result.stdout = /home/gc/openharmony/0510_master/out/sdk
+~/openharmony/0510_master/out/sdk/clang_x64/obj/third_party/openssl/build_all_generated/linux-x86_64 ~/openharmony/0510_master/out/sdk
+/home/gc/openharmony/0510_master/third_party/openssl/Configure linux-x86_64 no-shared no-module
+Configuring OpenSSL version 3.0.9 for target linux-x86_64
+Using os-specific seed configuration
+Created configdata.pm
+Running configdata.pm
+Created Makefile.in
+Created Makefile
+Created include/openssl/configuration.h
+
+**********************************************************************
+***                                                                ***
+***   OpenSSL has been successfully configured                     ***
+***                                                                ***
+***   If you encounter a problem while building, please open an    ***
+***   issue on GitHub <https://github.com/openssl/openssl/issues>  ***
+***   and include the output from the following command:           ***
+***                                                                ***
+***       perl configdata.pm --dump                                ***
+***                                                                ***
+***   (If you are new to OpenSSL, you might want to consult the    ***
+***   'Troubleshooting' section in the INSTALL.md file first)      ***
+***                                                                ***
+**********************************************************************
+~/openharmony/0510_master/out/sdk
+
+cmd ['/home/gc/openharmony/0510_master/third_party/openssl/make_openssl_build_all_generated.sh', '/home/gc/openharmony/0510_master/third_party/openssl', '/home/gc/openharmony/0510_master/out/sdk/clang_x64/obj/third_party/openssl/build_all_generated', 'linux-x86_64'] ok
+
