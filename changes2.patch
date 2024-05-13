@@ -1,0 +1,217 @@
+diff --git a/rosen/modules/2d_graphics/include/image/gpu_context.h b/rosen/modules/2d_graphics/include/image/gpu_context.h
+index 26e1c4088..3e68440d8 100644
+--- a/rosen/modules/2d_graphics/include/image/gpu_context.h
++++ b/rosen/modules/2d_graphics/include/image/gpu_context.h
+@@ -204,6 +204,15 @@ public:
+      */
+     void PurgeUnlockedResourcesByPid(bool scratchResourcesOnly, const std::set<pid_t>& exitedPidSet);
+ 
++    /**
++     * @brief                       Purge unlocked resources in every frame
++     * @param scratchResourcesOnly  Whether to scratch the resources only or not.
++     * @param exitedPidSet          GPU resource of exited PidSet used to purge unlocked resources.
++     * @param protectedPidSet       GPU resource of protectedPidSet will not be purged.
++     */
++    void PurgeResourcesEveryFrame(bool scratchResourcesOnly, const std::set<pid_t>& exitedPidSet,
++        const std::set<pid_t>& protectedPidSet);
++
+     /**
+      * @brief                   Purge unlocked resources from the safe cache until
+      *                          the provided byte count has been reached or we have purged all unlocked resources.
+diff --git a/rosen/modules/2d_graphics/src/drawing/engine_adapter/impl_interface/gpu_context_impl.h b/rosen/modules/2d_graphics/src/drawing/engine_adapter/impl_interface/gpu_context_impl.h
+index d3a6ec81e..c32c743c1 100644
+--- a/rosen/modules/2d_graphics/src/drawing/engine_adapter/impl_interface/gpu_context_impl.h
++++ b/rosen/modules/2d_graphics/src/drawing/engine_adapter/impl_interface/gpu_context_impl.h
+@@ -66,6 +66,9 @@ public:
+ 
+     virtual void PurgeUnlockedResourcesByPid(bool scratchResourcesOnly, const std::set<pid_t>& exitedPidSet) = 0;
+ 
++    virtual void PurgeResourcesEveryFrame(bool scratchResourcesOnly, const std::set<pid_t>& exitedPidSet,
++        const std::set<pid_t>& protectedPidSet) = 0;
++
+     virtual void PurgeUnlockAndSafeCacheGpuResources() = 0;
+ 
+     virtual void ReleaseByTag(const GPUResourceTag &tag) = 0;
+diff --git a/rosen/modules/2d_graphics/src/drawing/engine_adapter/skia_adapter/skia_gpu_context.cpp b/rosen/modules/2d_graphics/src/drawing/engine_adapter/skia_adapter/skia_gpu_context.cpp
+index 7b263dce0..64cb06b21 100644
+--- a/rosen/modules/2d_graphics/src/drawing/engine_adapter/skia_adapter/skia_gpu_context.cpp
++++ b/rosen/modules/2d_graphics/src/drawing/engine_adapter/skia_adapter/skia_gpu_context.cpp
+@@ -257,6 +257,16 @@ void SkiaGPUContext::PurgeUnlockedResourcesByPid(bool scratchResourcesOnly, cons
+     grContext_->purgeUnlockedResourcesByPid(scratchResourcesOnly, exitedPidSet);
+ }
+ 
++void SkiaGPUContext::PurgeResourcesEveryFrame(bool scratchResourcesOnly, const std::set<pid_t>& exitedPidSet,
++        const std::set<pid_t>& protectedPidSet)
++{
++    if(!grContext_){
++        LOGD("SkiaGPUContext::PurgeResourcesEveryFrame,grContext_ is nullptr");
++        return;
++    }
++    grContext_->purgeResourcesEveryFrame(scratchResourcesOnly, exitedPidSet, protectedPidSet);
++}
++
+ void SkiaGPUContext::PurgeUnlockAndSafeCacheGpuResources()
+ {
+     if (!grContext_) {
+diff --git a/rosen/modules/2d_graphics/src/drawing/engine_adapter/skia_adapter/skia_gpu_context.h b/rosen/modules/2d_graphics/src/drawing/engine_adapter/skia_adapter/skia_gpu_context.h
+index 27c3a77cc..2282beb4e 100644
+--- a/rosen/modules/2d_graphics/src/drawing/engine_adapter/skia_adapter/skia_gpu_context.h
++++ b/rosen/modules/2d_graphics/src/drawing/engine_adapter/skia_adapter/skia_gpu_context.h
+@@ -88,6 +88,9 @@ public:
+ 
+     void PurgeUnlockedResourcesByPid(bool scratchResourcesOnly, const std::set<pid_t>& exitedPidSet) override;
+ 
++    void PurgeResourcesEveryFrame(bool scratchResourcesOnly, const std::set<pid_t>& exitedPidSet,
++        const std::set<pid_t>& protectedPidSet) override;
++
+     void PurgeUnlockAndSafeCacheGpuResources() override;
+ 
+     void ReleaseByTag(const GPUResourceTag &tag) override;
+diff --git a/rosen/modules/2d_graphics/src/drawing/image/gpu_context.cpp b/rosen/modules/2d_graphics/src/drawing/image/gpu_context.cpp
+index 258cc21b7..535df9bc5 100644
+--- a/rosen/modules/2d_graphics/src/drawing/image/gpu_context.cpp
++++ b/rosen/modules/2d_graphics/src/drawing/image/gpu_context.cpp
+@@ -133,6 +133,11 @@ void GPUContext::PurgeUnlockAndSafeCacheGpuResources()
+ {
+     impl_->PurgeUnlockAndSafeCacheGpuResources();
+ }
++void GPUContext::PurgeResourcesEveryFrame(bool scratchResourcesOnly, const std::set<pid_t>& exitedPidSet,
++        const std::set<pid_t>& protectedPidSet)
++{
++    impl_->PurgeResourcesEveryFrame(scratchResourcesOnly, exitedPidSet, protectedPidSet);
++}
+ 
+ void GPUContext::ReleaseByTag(const GPUResourceTag &tag)
+ {
+diff --git a/rosen/modules/render_service/core/memory/rs_memory_manager.cpp b/rosen/modules/render_service/core/memory/rs_memory_manager.cpp
+index 61714eca3..0abde1f9c 100644
+--- a/rosen/modules/render_service/core/memory/rs_memory_manager.cpp
++++ b/rosen/modules/render_service/core/memory/rs_memory_manager.cpp
+@@ -115,6 +115,18 @@ void MemoryManager::ReleaseUnlockGpuResource(Drawing::GPUContext* gpuContext, st
+     gpuContext->PurgeUnlockedResourcesByPid(false, exitedPidSet);
+ #endif
+ }
++void MemoryManager::PurgeResourcesEveryFrame(Drawing::GPUContext* gpuContext, bool scratchResourceOnly,
++    std::set<pid_t>& exitedPidSet, std::set<pid_t>& protectedPidSet)
++{
++#if defined(RS_ENABLE_GL) || defined(RS_ENABLE_VK)
++    if (!gpuContext) {
++        RS_LOGE("PurgeResourcesEveryFrame fail, gpuContext is nullptr");
++        return;
++    }
++    RS_TRACE_NAME_FMT("PurgeResourcesEveryFrame exitedPidSet size: %d",exitedPidSet.size());
++    gpuContext->PurgeResourcesEveryFrame(scratchResourceOnly, exitedPidSet, protectedPidSet);
++#endif
++}
+ 
+ void MemoryManager::ReleaseUnlockGpuResource(Drawing::GPUContext* grContext, NodeId surfaceNodeId)
+ {
+diff --git a/rosen/modules/render_service/core/memory/rs_memory_manager.h b/rosen/modules/render_service/core/memory/rs_memory_manager.h
+index 9b30e5746..35bc1338e 100644
+--- a/rosen/modules/render_service/core/memory/rs_memory_manager.h
++++ b/rosen/modules/render_service/core/memory/rs_memory_manager.h
+@@ -38,6 +38,8 @@ public:
+     static void ReleaseUnlockGpuResource(Drawing::GPUContext* gpuContext, pid_t pid);
+     static void ReleaseUnlockGpuResource(Drawing::GPUContext* gpuContext, Drawing::GPUResourceTag& tag);
+     static void ReleaseUnlockGpuResource(Drawing::GPUContext* gpuContext, std::set<pid_t> exitedPidSet);
++    static void PurgeResourcesEveryFrame(Drawing::GPUContext* gpuContext, bool scratchResourceOnly,
++        std::set<pid_t>& exitedPidSet, std::set<pid_t>& protectedPidSet);
+     static void ReleaseAllGpuResource(Drawing::GPUContext* gpuContext, pid_t pid);
+     static void ReleaseAllGpuResource(Drawing::GPUContext* gpuContext, Drawing::GPUResourceTag& tag);
+     static void ReleaseUnlockGpuResource(Drawing::GPUContext* grContext, bool scratchResourcesOnly = true);
+diff --git a/rosen/modules/render_service/core/pipeline/rs_main_thread.cpp b/rosen/modules/render_service/core/pipeline/rs_main_thread.cpp
+index c4a9c60d4..b43dfc216 100644
+--- a/rosen/modules/render_service/core/pipeline/rs_main_thread.cpp
++++ b/rosen/modules/render_service/core/pipeline/rs_main_thread.cpp
+@@ -161,6 +161,7 @@ constexpr uint32_t CAL_NODE_PREFERRED_FPS_LIMIT = 50;
+ constexpr uint32_t EVENT_SET_HARDWARE_UTIL = 100004;
+ constexpr const char* WALLPAPER_VIEW = "WallpaperView";
+ constexpr const char* CLEAR_GPU_CACHE = "ClearGpuCache";
++constexpr const char* CLEAR_GPU_CACHE_IN_FRAME = "ClearGpuCacheEveryFrame";
+ constexpr const char* MEM_MGR = "MemMgr";
+ constexpr const char* DESKTOP_NAME_FOR_ROTATION = "SCBDesktop";
+ constexpr const char* CAPTURE_WINDOW_NAME = "CapsuleWindow";
+@@ -1384,6 +1385,30 @@ uint32_t RSMainThread::GetDynamicRefreshRate() const
+     return refreshRate;
+ }
+ 
++void RSMainThread::ClearMemoryCacheInFrame(ClearMemoryMoment moment, bool deeply)
++{
++    if(!RSSystemProperties::GetReleaseResourceEnabled()){
++        return;
++    }
++    RS_TRACE_NAME_FMT("MEM ClearMemoryCacheInFrame add task");
++    PostTask(
++        [this]() {
++            auto grContext = GetRenderEngine()->GetRenderContext()->GetDrGPUContext();
++            if (!grContext) {
++                return;
++            }
++            std::string pidList;
++            for (auto& pid : exitedPidSet_) {
++                pidList += "[" + std::to_string(pid) + "]";
++            }
++            RS_TRACE_NAME_FMT("ClearMemoryCacheInFrame pids=%s",pidList.c_str());
++            std::set<int> protectedPidSet = { GetDesktopPidForRotationScene() };
++            MemoryManager::PurgeResourcesEveryFrame(grContext,true , this->exitedPidSet_, protectedPidSet);
++            RemoveTask(CLEAR_GPU_CACHE_IN_FRAME);
++        },
++        CLEAR_GPU_CACHE_IN_FRAME, 0, AppExecFwk::EventQueue::Priority::LOW);
++}
++
+ void RSMainThread::ClearMemoryCache(ClearMemoryMoment moment, bool deeply, pid_t pid)
+ {
+     if (!RSSystemProperties::GetReleaseResourceEnabled()) {
+@@ -2374,6 +2399,10 @@ void RSMainThread::OnVsync(uint64_t timestamp, void* data)
+ #endif
+     ProcessScreenHotPlugEvents();
+     RSJankStatsOnVsyncEnd(onVsyncStartTime, onVsyncStartTimeSteady, onVsyncStartTimeSteadyFloat);
++    if (RSSystemProperties::GetPurgeResourcesEveryEnabled()) {
++        // clear memory after every vsync
++        ClearMemoryCacheInFrame(context_->clearMoment_, false);
++    }
+     isOnVsync_.store(false);
+ }
+ 
+diff --git a/rosen/modules/render_service/core/pipeline/rs_main_thread.h b/rosen/modules/render_service/core/pipeline/rs_main_thread.h
+index 0a26ac56e..1e40720c8 100644
+--- a/rosen/modules/render_service/core/pipeline/rs_main_thread.h
++++ b/rosen/modules/render_service/core/pipeline/rs_main_thread.h
+@@ -107,6 +107,7 @@ public:
+     void ResetAnimateNodeFlag();
+     void GetAppMemoryInMB(float& cpuMemSize, float& gpuMemSize);
+     void ClearMemoryCache(ClearMemoryMoment moment, bool deeply = false, pid_t pid = -1);
++    void ClearMemoryCacheInFrame(ClearMemoryMoment moment, bool deeply = false);
+ 
+     template<typename Task, typename Return = std::invoke_result_t<Task>>
+     std::future<Return> ScheduleTask(Task&& task)
+diff --git a/rosen/modules/render_service_base/include/platform/common/rs_system_properties.h b/rosen/modules/render_service_base/include/platform/common/rs_system_properties.h
+index 99a034de3..cf872a56b 100644
+--- a/rosen/modules/render_service_base/include/platform/common/rs_system_properties.h
++++ b/rosen/modules/render_service_base/include/platform/common/rs_system_properties.h
+@@ -193,6 +193,7 @@ public:
+ 
+     static bool GetDrawFilterWithoutSnapshotEnabled();
+     static bool GetBlurExtraFilterEnabled();
++    static bool GetPurgeResourcesEveryEnabled();
+ 
+     static bool GetAnimationCacheEnabled();
+ 
+diff --git a/rosen/modules/render_service_base/src/platform/ohos/rs_system_properties.cpp b/rosen/modules/render_service_base/src/platform/ohos/rs_system_properties.cpp
+index db518d686..e3cb2113c 100644
+--- a/rosen/modules/render_service_base/src/platform/ohos/rs_system_properties.cpp
++++ b/rosen/modules/render_service_base/src/platform/ohos/rs_system_properties.cpp
+@@ -796,6 +796,13 @@ bool RSSystemProperties::GetBlurExtraFilterEnabled()
+     return blurExtraFilterEnabled;
+ }
+ 
++bool RSSystemProperties::GetPurgeResourcesEveryEnabled()
++{
++    static bool purgeResourcesEveryEnabled =
++        (std::atoi(system::GetParameter("persist.sys.graphic.PurgeResourcesEveryEnabled", "0").c_str()) != 0);
++    return purgeResourcesEveryEnabled;
++}
++
+ #ifdef DDGR_ENABLE_FEATURE_OPINC
+ const DdgrOpincType RSSystemProperties::ddgrOpincType_ =
+     static_cast<DdgrOpincType>(std::atoi((system::GetParameter("persist.ddgr.opinctype", "2")).c_str()));

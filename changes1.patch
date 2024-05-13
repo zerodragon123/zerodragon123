@@ -1,0 +1,179 @@
+diff --git a/include/gpu/GrDirectContext.h b/include/gpu/GrDirectContext.h
+index 8f77127ce1..acdfd33dbc 100644
+--- a/include/gpu/GrDirectContext.h
++++ b/include/gpu/GrDirectContext.h
+@@ -288,6 +288,8 @@ public:
+     void purgeUnlockedResources(size_t bytesToPurge, bool preferScratchResources);
+     void purgeUnlockedResourcesByTag(bool scratchResourcesOnly, const GrGpuResourceTag& tag);
+     void purgeUnlockedResourcesByPid(bool scratchResourcesOnly, const std::set<int>& exitedPidSet);
++    void purgeResourcesEveryFrame(bool scratchResourcesOnly, const std::set<int>& exitedPidSet,
++        const std::set<int>& protectedPidSet);
+     void purgeUnlockAndSafeCacheGpuResources();
+ 
+     /**
+diff --git a/src/gpu/GrDirectContext.cpp b/src/gpu/GrDirectContext.cpp
+index 7aff4df91b..51672e0ef6 100644
+--- a/src/gpu/GrDirectContext.cpp
++++ b/src/gpu/GrDirectContext.cpp
+@@ -30,6 +30,11 @@
+ #include "src/gpu/text/GrAtlasManager.h"
+ #include "src/gpu/text/GrStrikeCache.h"
+ #include "src/image/SkImage_GpuBase.h"
++
++#ifdef SKIA_OHOS_FOR_OHOS_TRACE
++#include "hitrace_meter.h"
++#endif
++
+ #if SK_GPU_V1
+ #include "src/gpu/ops/SmallPathAtlasMgr.h"
+ #else
+@@ -366,6 +371,17 @@ void GrDirectContext::purgeUnlockedResourcesByPid(bool scratchResourcesOnly, con
+     this->getTextBlobCache()->purgeStaleBlobs();
+ }
+ 
++void GrDirectContext::purgeResourcesEveryFrame(bool scratchResourcesOnly, const std::set<int>& exitedPidSet,
++        const std::set<int>& protectedPidSet)
++{
++    ASSERT_SINGLE_OWNER
++
++    if (this->abandoned()) {
++        return;
++    }
++
++    fResourceCache->purgeResourcesEveryFrame(scratchResourcesOnly, exitedPidSet, protectedPidSet);
++}
+ void GrDirectContext::performDeferredCleanup(std::chrono::milliseconds msNotUsed,
+                                              bool scratchResourcesOnly) {
+     TRACE_EVENT0("skia.gpu", TRACE_FUNC);
+diff --git a/src/gpu/GrResourceCache.cpp b/src/gpu/GrResourceCache.cpp
+index fcea878a29..6dc0aaa39d 100644
+--- a/src/gpu/GrResourceCache.cpp
++++ b/src/gpu/GrResourceCache.cpp
+@@ -614,6 +614,10 @@ void GrResourceCache::didChangeBudgetStatus(GrGpuResource* resource) {
+ }
+ 
+ void GrResourceCache::purgeAsNeeded() {
++    #ifdef SKIA_OHOS_FOR_OHOS_TRACE
++    HITRACE_METER_FMT(HITRACE_TAG_GRAPHIC_AGP, "purgeAsNeeded now=%d, limit=%d, purge=%d, all=%d",
++        fBudgetedBytes, fMaxBytes, fPurgeableBytes, fBytes);
++    #endif
+     SkTArray<GrUniqueKeyInvalidatedMessage> invalidKeyMsgs;
+     fInvalidUniqueKeyInbox.poll(&invalidKeyMsgs);
+     if (invalidKeyMsgs.count()) {
+@@ -759,6 +763,39 @@ void GrResourceCache::purgeUnlockAndSafeCacheGpuResources() {
+     this->validate();
+ }
+ 
++void GrResourceCache::purgeResourcesEveryFrame(bool scratchResourcesOnly, const std::set<int>& exitedPidSet,
++        const std::set<int>& protectedPidSet) {
++    #ifdef SKIA_OHOS_FOR_OHOS_TRACE
++    HITRACE_METER_FMT(HITRACE_TAG_GRAPHIC_AGP, "purgeAsNeeded now=%d, limit=%d, purge=%d, all=%d",
++        fBudgetedBytes, fMaxBytes, fPurgeableBytes, fBytes);
++    #endif
++    fThreadSafeCache->dropUniqueRefs(nullptr);
++    if (exitedPidSet.size() > 1) {
++        for (int i = 1; i < fPurgeableQueue.count(); i++) {
++            GrGpuResource* resource = fPurgeableQueue.at(i);
++            SkASSERT(resource->resourcePriv().isPurgeable());
++            if (exitedPidSet.find(resource->getResourceTag().fPid) != exitedPidSet.end()) {
++                resource->cacheAccess().release();
++                this->validate();
++                return;
++            }
++        }
++    }
++    fPurgeableQueue.sort();
++    if (fBudgetedBytes >= fMaxBytesSoftLimit) {
++        for (int i=0; i < fPurgeableQueue.count(); i++) {
++            GrGpuResource* resource = fPurgeableQueue.at(i);
++            SkASSERT(resource->resourcePriv().isPurgeable());
++            if (protectedPidSet.find(resource->getResourceTag().fPid) == protectedPidSet.end()
++                && (!scratchResourcesOnly || !resource->getUniqueKey().isValid())) {
++                resource->cacheAccess().release();
++                this->validate();
++                return;
++            }
++        }
++    }
++}
++
+ void GrResourceCache::purgeUnlockedResourcesByPid(bool scratchResourceOnly, const std::set<int>& exitedPidSet) {
+     // Sort the queue
+     fPurgeableQueue.sort();
+@@ -813,6 +850,10 @@ void GrResourceCache::purgeUnlockedResourcesByTag(bool scratchResourcesOnly, con
+ }
+ 
+ bool GrResourceCache::purgeToMakeHeadroom(size_t desiredHeadroomBytes) {
++    #ifdef SKIA_OHOS_FOR_OHOS_TRACE
++    HITRACE_METER_FMT(HITRACE_TAG_GRAPHIC_AGP, "purgeAsNeeded now=%d, limit=%d, purge=%d, all=%d",
++        fBudgetedBytes, fMaxBytes, fPurgeableBytes, fBytes);
++    #endif
+     AutoValidate av(this);
+     if (desiredHeadroomBytes > fMaxBytes) {
+         return false;
+diff --git a/src/gpu/GrResourceCache.h b/src/gpu/GrResourceCache.h
+index a49e7fbc28..c46e68b29f 100644
+--- a/src/gpu/GrResourceCache.h
++++ b/src/gpu/GrResourceCache.h
+@@ -192,6 +192,8 @@ public:
+ 
+     void purgeUnlockedResourcesByTag(bool scratchResourceOnly, const GrGpuResourceTag& tag);
+     void purgeUnlockedResourcesByPid(bool scratchResourceOnly, const std::set<int>& exitedPidSet);
++    void purgeResourcesEveryFrame(bool scratchResourcesOnly, const std::set<int>& exitedPidSet,
++        const std::set<int>& protectedPidSet);
+     void purgeUnlockAndSafeCacheGpuResources();
+ 
+     // Purge unlocked resources not used since the passed point in time. If 'scratchResourcesOnly'
+@@ -396,6 +398,7 @@ private:
+     // our budget, used in purgeAsNeeded()
+     size_t                              fMaxBytes = kDefaultMaxSize;
+ 
++    size_t                              fMaxBytesSoftLimit = 450000000;
+ #if GR_CACHE_STATS
+     int                                 fHighWaterCount = 0;
+     size_t                              fHighWaterBytes = 0;
+diff --git a/src/gpu/vk/GrVkMemory.cpp b/src/gpu/vk/GrVkMemory.cpp
+index 00ce276112..d01a6af710 100644
+--- a/src/gpu/vk/GrVkMemory.cpp
++++ b/src/gpu/vk/GrVkMemory.cpp
+@@ -17,6 +17,8 @@
+ using AllocationPropertyFlags = GrVkMemoryAllocator::AllocationPropertyFlags;
+ using BufferUsage = GrVkMemoryAllocator::BufferUsage;
+ 
++static std::unique_ptr<SkExecutor> executor = SkExecutor::MakeFIFOThreadPool(1, false);
++
+ bool GrVkMemory::AllocAndBindBufferMemory(GrVkGpu* gpu,
+                                           VkBuffer buffer,
+                                           BufferUsage usage,
+@@ -55,8 +57,13 @@ bool GrVkMemory::AllocAndBindBufferMemory(GrVkGpu* gpu,
+ 
+ void GrVkMemory::FreeBufferMemory(const GrVkGpu* gpu, const GrVkAlloc& alloc) {
+     SkASSERT(alloc.fBackendMemory);
+-    GrVkMemoryAllocator* allocator = gpu->memoryAllocator();
+-    allocator->freeMemory(alloc.fBackendMemory);
++    bool asyncFreeVkMemoryEnabled = 
++        (std::atoi(system::GetParameter("persist.sys.graphic.AsyncFreeVkMemoryEnabled", "0").c_str()) != 0);
++    if (asyncFreeVkMemoryEnabled) {
++        executor->add([allocator = gpu->memoryAllocator(), backedMem = alloc.fBackendMemory] {
++            allocator->freeMemory(backedMem);
++        });
++    }
+ }
+ 
+ bool GrVkMemory::AllocAndBindImageMemory(GrVkGpu* gpu,
+@@ -112,8 +119,13 @@ bool GrVkMemory::AllocAndBindImageMemory(GrVkGpu* gpu,
+ 
+ void GrVkMemory::FreeImageMemory(const GrVkGpu* gpu, const GrVkAlloc& alloc) {
+     SkASSERT(alloc.fBackendMemory);
+-    GrVkMemoryAllocator* allocator = gpu->memoryAllocator();
+-    allocator->freeMemory(alloc.fBackendMemory);
++    bool asyncFreeVkMemoryEnabled = 
++        (std::atoi(system::GetParameter("persist.sys.graphic.AsyncFreeVkMemoryEnabled", "0").c_str()) != 0);
++    if (asyncFreeVkMemoryEnabled) {
++        executor->add([allocator = gpu->memoryAllocator(), backedMem = alloc.fBackendMemory] {
++            allocator->freeMemory(backedMem);
++        });
++    }
+ }
+ 
+ void* GrVkMemory::MapAlloc(GrVkGpu* gpu, const GrVkAlloc& alloc) {
